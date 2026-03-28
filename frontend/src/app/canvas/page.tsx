@@ -306,11 +306,17 @@ export default function CanvasPage() {
             <div ref={canvasRef} className="space-y-4">
               {/* Image */}
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                <img
-                  src={`data:${result.image_mime_type};base64,${result.image_base64}`}
-                  alt={result.title}
-                  className="w-full object-cover max-h-[220px] sm:max-h-[300px] lg:max-h-[380px]"
-                />
+                {result.image_base64 ? (
+                  <img
+                    src={`data:${result.image_mime_type};base64,${result.image_base64}`}
+                    alt={result.title}
+                    className="w-full object-cover max-h-[220px] sm:max-h-[300px] lg:max-h-[380px]"
+                  />
+                ) : (
+                  <div className="w-full h-[220px] sm:h-[300px] lg:h-[380px] bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 flex items-center justify-center">
+                    <Sparkles className="w-16 h-16 text-purple-400/40" />
+                  </div>
+                )}
                 {/* Overlay gradient with title */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
                   <SubjectBadge subject={result.subject as Subject} size="sm" />

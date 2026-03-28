@@ -717,25 +717,34 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
     imagen_prompt = _raw_prompt.rstrip(".") + _no_text_suffix
 
     # ── Step 2: Generate image with Imagen 4 Fast ────────────────────────────
-    try:
-        def _imagen_call():
-            return client.models.generate_images(
-                model=settings.imagen_model,
-                prompt=imagen_prompt,
-                config=types.GenerateImagesConfig(
-                    number_of_images=1,
-                    aspect_ratio="16:9",
-                    output_mime_type="image/jpeg",
-                ),
-            )
-
-        img_response = await asyncio.to_thread(_imagen_call)
-        image_bytes = img_response.generated_images[0].image.image_bytes
-        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-        image_mime = "image/jpeg"
-    except Exception as exc:
-        logger.error("Imagen generation error: %s", exc)
-        raise RuntimeError(f"Rasm yaratishda xatolik: {exc}") from exc
+    image_b64 = ""
+    image_mime = "image/jpeg"
+    _imagen_models = [
+        "imagen-4.0-fast-generate-001",
+        "imagen-4.0-generate-001",
+        "imagen-3.0-fast-generate-001",
+    ]
+    for _model in _imagen_models:
+        try:
+            def _imagen_call(m=_model):
+                return client.models.generate_images(
+                    model=m,
+                    prompt=imagen_prompt,
+                    config=types.GenerateImagesConfig(
+                        number_of_images=1,
+                        aspect_ratio="16:9",
+                        output_mime_type="image/jpeg",
+                    ),
+                )
+            img_response = await asyncio.to_thread(_imagen_call)
+            image_bytes = img_response.generated_images[0].image.image_bytes
+            if image_bytes:
+                image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+                break
+        except Exception as exc:
+            logger.warning("Imagen model %s failed: %s", _model, exc)
+    if not image_b64:
+        logger.error("All Imagen models failed for topic: %s", topic)
 
     return {
         "title":          data.get("title", topic),
