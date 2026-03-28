@@ -55,7 +55,7 @@ export default function CountdownPage() {
     setDone(false);
     setFlash(null);
     try {
-      const res = await gamesApi.trueFalse(subject, lang, 30);
+      const res = await gamesApi.trueFalse(subject, lang, 15);
       if (!res.data.items?.length) { setError("Savollar topilmadi."); }
       else setItems(res.data.items);
     } catch {

@@ -39,7 +39,7 @@ export default function ChainPage() {
     setMaxChain(0);
     setDone(false);
     try {
-      const res = await gamesApi.fillBlank(subject, lang, 20);
+      const res = await gamesApi.fillBlank(subject, lang, 12);
       if (!res.data.items?.length) { setError("Savollar topilmadi."); }
       else setItems(res.data.items);
     } catch {

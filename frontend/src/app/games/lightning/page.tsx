@@ -11,21 +11,22 @@ const SUBJECTS = [
   { value: "MOTHER_TONGUE", label: "📚 Ona tili" },
 ];
 
-const TIME_PER_Q = 8; // seconds
+const TIME_PER_Q = 8;
+const KEYS = ["A", "B", "C", "D"];
 
 interface KimQ {
   question: string;
-  options: { A: string; B: string; C: string; D: string };
-  correct_option: string;
-  explanation: string;
+  options: string[];
+  correct_index: number;
+  explanation: string | null;
 }
 
 export default function LightningPage() {
-  const { tr, lang } = useLang();
+  const { tr } = useLang();
   const [subject, setSubject] = useState("MATHEMATICS");
   const [questions, setQuestions] = useState<KimQ[]>([]);
   const [idx, setIdx] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIME_PER_Q);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
@@ -37,7 +38,7 @@ export default function LightningPage() {
   const isAnswered = selected !== null;
 
   const advance = useCallback(() => {
-    const correct = selected === current?.correct_option;
+    const correct = selected === current?.correct_index;
     const newScore = correct ? score + 1 : score;
     if (idx + 1 >= questions.length) {
       setDone(true);
@@ -53,15 +54,13 @@ export default function LightningPage() {
     }
   }, [selected, current, score, idx, questions.length]);
 
-  // Countdown timer
   useEffect(() => {
     if (!current || isAnswered || done) return;
-    if (timeLeft <= 0) { setSelected("__timeout__"); return; }
+    if (timeLeft <= 0) { setSelected(-1); return; }
     const t = setTimeout(() => setTimeLeft(s => s - 1), 1000);
     return () => clearTimeout(t);
   }, [timeLeft, current, isAnswered, done]);
 
-  // Auto-advance after answer
   useEffect(() => {
     if (!isAnswered || done) return;
     const t = setTimeout(advance, 1400);
@@ -79,8 +78,8 @@ export default function LightningPage() {
     setTimeLeft(TIME_PER_Q);
     try {
       const res = await gamesApi.kimBolmoqchi(subject);
-      if (!res.data.questions?.length) { setError("Savollar topilmadi."); }
-      else setQuestions(res.data.questions.slice(0, 10));
+      if (!res.data?.length) { setError("Savollar topilmadi."); }
+      else setQuestions(res.data.slice(0, 10));
     } catch {
       setError("Server xatosi. Qaytadan urinib ko'ring.");
     } finally {
@@ -129,7 +128,7 @@ export default function LightningPage() {
         <div className="text-6xl">{pct >= 80 ? "⚡🏆" : pct >= 60 ? "👍" : "💪"}</div>
         <h2 className="text-2xl font-black text-white">{tr("game_finish")}</h2>
         <p className="text-5xl font-black text-yellow-400">{score}/{questions.length}</p>
-        <p className="text-slate-400">{pct}% to'g'ri</p>
+        <p className="text-slate-400">{pct}% to&apos;g&apos;ri</p>
         <div className="flex items-center gap-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full px-5 py-2">
           <Zap className="w-4 h-4 text-yellow-400" />
           <span className="text-yellow-300 font-bold">+{coinsEarned} Chaqa</span>
@@ -142,12 +141,6 @@ export default function LightningPage() {
     );
   }
 
-  const opts = [
-    { key: "A", val: current.options.A },
-    { key: "B", val: current.options.B },
-    { key: "C", val: current.options.C },
-    { key: "D", val: current.options.D },
-  ];
   const timerPct = (timeLeft / TIME_PER_Q) * 100;
   const timerColor = timeLeft <= 3 ? "bg-red-500" : timeLeft <= 5 ? "bg-yellow-500" : "bg-emerald-500";
 
@@ -161,7 +154,6 @@ export default function LightningPage() {
           <span className="ml-auto text-xs text-slate-400">{idx + 1}/{questions.length}</span>
           <span className={`text-sm font-black ${timeLeft <= 3 ? "text-red-400" : "text-yellow-300"}`}>{timeLeft}s</span>
         </div>
-        {/* Timer bar */}
         <div className="h-1 bg-slate-700">
           <div className={`h-full ${timerColor} transition-all duration-1000`} style={{ width: `${timerPct}%` }} />
         </div>
@@ -173,10 +165,10 @@ export default function LightningPage() {
           <p className="text-white text-base font-semibold leading-relaxed">{current.question}</p>
         </div>
         <div className="grid grid-cols-2 gap-3 w-full">
-          {opts.map(({ key, val }) => {
+          {current.options.map((val, i) => {
+            const isSelected = selected === i;
+            const isCorrect = i === current.correct_index;
             let cls = "py-3.5 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left flex items-start gap-2 ";
-            const isSelected = selected === key;
-            const isCorrect = key === current.correct_option;
             if (!isAnswered) {
               cls += "bg-slate-800 border-slate-600 text-white hover:border-yellow-500/60 hover:bg-yellow-500/10 active:scale-[0.97]";
             } else if (isCorrect) {
@@ -187,15 +179,15 @@ export default function LightningPage() {
               cls += "bg-slate-800/50 border-slate-700/50 text-slate-500";
             }
             return (
-              <button key={key} onClick={() => !isAnswered && setSelected(key)} disabled={!!isAnswered} className={cls}>
-                <span className="font-black text-slate-400 text-xs mt-0.5 flex-shrink-0">{key}</span>
+              <button key={i} onClick={() => !isAnswered && setSelected(i)} disabled={!!isAnswered} className={cls}>
+                <span className="font-black text-slate-400 text-xs mt-0.5 flex-shrink-0">{KEYS[i]}</span>
                 <span>{val}</span>
               </button>
             );
           })}
         </div>
-        {isAnswered && selected !== "__timeout__" && (
-          <div className={`w-full rounded-xl p-3 text-xs ${selected === current.correct_option ? "bg-emerald-900/40 border border-emerald-700 text-emerald-200" : "bg-red-900/40 border border-red-700 text-red-200"}`}>
+        {isAnswered && selected !== -1 && current.explanation && (
+          <div className={`w-full rounded-xl p-3 text-xs ${selected === current.correct_index ? "bg-emerald-900/40 border border-emerald-700 text-emerald-200" : "bg-red-900/40 border border-red-700 text-red-200"}`}>
             {current.explanation}
           </div>
         )}
