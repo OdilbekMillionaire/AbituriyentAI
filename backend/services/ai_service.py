@@ -145,9 +145,6 @@ Ko'rsatmalar:
         response = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         return response.text
     except Exception as exc:
@@ -473,9 +470,6 @@ Markdown formatlashdan keng foydalaning: jadvallar, qalin matn, ro'yxatlar, kod 
         response = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         text = response.text.strip()
 
@@ -557,9 +551,6 @@ Savollar dars mazmuniga asoslangan bo'lsin. Qiyinlik: oson (2) + o'rta (2) + qiy
         response = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         text = response.text.strip()
         if text.startswith("```"):
@@ -706,9 +697,6 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
         content_resp = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=content_prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         text = content_resp.text.strip()
         if text.startswith("```"):
@@ -816,9 +804,6 @@ Faqat quyidagi JSON formatida shaxsiy maslahat bering (boshqa matn yo'q):
         response = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         text = response.text.strip()
         if text.startswith("```"):
@@ -868,9 +853,6 @@ Qoidalar:
         resp = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         raw = resp.text.strip()
         if raw.startswith("```"):
@@ -923,9 +905,6 @@ Qoidalar:
         resp = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         raw = resp.text.strip()
         if raw.startswith("```"):
@@ -1070,9 +1049,6 @@ Qoidalar:
         resp = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         raw = resp.text.strip()
         if raw.startswith("```"):
@@ -1116,9 +1092,6 @@ Qoidalar:
         resp = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         raw = resp.text.strip()
         if raw.startswith("```"):
@@ -1170,9 +1143,6 @@ Qoidalar:
         resp = await client.aio.models.generate_content(
             model=settings.gemini_tutor_model,
             contents=prompt,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
         )
         raw = resp.text.strip()
         if raw.startswith("```"):
