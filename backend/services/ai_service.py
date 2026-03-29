@@ -737,7 +737,10 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
                     ),
                 )
             img_response = await asyncio.to_thread(_imagen_call)
-            image_bytes = img_response.generated_images[0].image.image_bytes
+            imgs = img_response.generated_images
+            print(f"[IMAGEN OK] model={_model} images_count={len(imgs)}", flush=True)
+            image_bytes = imgs[0].image.image_bytes if imgs else None
+            print(f"[IMAGEN BYTES] size={len(image_bytes) if image_bytes else 0}", flush=True)
             if image_bytes:
                 image_b64 = base64.b64encode(image_bytes).decode("utf-8")
                 break

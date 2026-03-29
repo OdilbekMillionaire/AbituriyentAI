@@ -11,34 +11,13 @@
   "lang": "uz",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
-  "shortcuts": [
-    {
-      "name": "Simulyatsiya",
-      "short_name": "DTM Test",
-      "description": "DTM simulyatsiya rejimini boshlash",
-      "url": "/simulyatsiya",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Drill",
-      "short_name": "Drill",
-      "description": "Spaced repetition drill",
-      "url": "/drill",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
-    }
-  ],
+  "shortcuts": [],
   "screenshots": [],
   "prefer_related_applications": false
 }
