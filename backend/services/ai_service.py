@@ -738,10 +738,18 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
                 )
             img_response = await asyncio.to_thread(_imagen_call)
             imgs = img_response.generated_images
-            print(f"[IMAGEN OK] model={_model} images_count={len(imgs)}", flush=True)
             image_bytes = imgs[0].image.image_bytes if imgs else None
-            print(f"[IMAGEN BYTES] size={len(image_bytes) if image_bytes else 0}", flush=True)
             if image_bytes:
+                # Detect actual format from magic bytes
+                if image_bytes[:3] == b'\xff\xd8\xff':
+                    image_mime = "image/jpeg"
+                elif image_bytes[:8] == b'\x89PNG\r\n\x1a\n':
+                    image_mime = "image/png"
+                elif image_bytes[:4] == b'RIFF' and image_bytes[8:12] == b'WEBP':
+                    image_mime = "image/webp"
+                else:
+                    image_mime = "image/jpeg"
+                print(f"[IMAGEN OK] model={_model} size={len(image_bytes)} mime={image_mime}", flush=True)
                 image_b64 = base64.b64encode(image_bytes).decode("utf-8")
                 break
         except Exception as exc:
