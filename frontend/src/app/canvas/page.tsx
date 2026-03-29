@@ -25,8 +25,7 @@ interface CanvasResult {
   facts: CanvasFact[];
   timeline: CanvasEvent[];
   key_figures: string[];
-  image_base64: string;
-  image_mime_type: string;
+  image_url: string;
   subject: string;
   topic: string;
 }
@@ -122,15 +121,12 @@ export default function CanvasPage() {
   }
 
   function handleDownload() {
-    if (!result) return;
-    const node = canvasRef.current;
-    if (!node) return;
-    // Export the canvas card as PNG via html2canvas-like approach using window.print
-    // Simple approach: open image in new tab for saving
-    const dataUrl = `data:${result.image_mime_type};base64,${result.image_base64}`;
+    if (!result?.image_url) return;
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
     const link = document.createElement("a");
-    link.href = dataUrl;
+    link.href = `${apiBase}${result.image_url}`;
     link.download = `canvas-${result.topic.slice(0, 30).replace(/\s+/g, "-")}.jpg`;
+    link.target = "_blank";
     link.click();
   }
 
@@ -306,24 +302,17 @@ export default function CanvasPage() {
             <div ref={canvasRef} className="space-y-4">
               {/* Image */}
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                {result.image_base64 ? (
+                {result.image_url ? (
                   <img
-                    src={`data:${result.image_mime_type};base64,${result.image_base64}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL || ""}${result.image_url}`}
                     alt={result.title}
                     className="w-full object-cover min-h-[220px] max-h-[220px] sm:max-h-[300px] lg:max-h-[380px]"
-                    onError={(e) => {
-                      const t = e.currentTarget;
-                      t.style.display = "none";
-                      t.nextElementSibling?.removeAttribute("style");
-                    }}
                   />
-                ) : null}
-                <div
-                  className="w-full h-[220px] sm:h-[300px] lg:h-[380px] bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 flex items-center justify-center"
-                  style={{ display: result.image_base64 ? "none" : "flex" }}
-                >
-                  <Sparkles className="w-16 h-16 text-purple-400/40" />
-                </div>
+                ) : (
+                  <div className="w-full h-[220px] sm:h-[300px] lg:h-[380px] bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 flex items-center justify-center">
+                    <Sparkles className="w-16 h-16 text-purple-400/40" />
+                  </div>
+                )}
                 {/* Overlay gradient with title */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
                   <SubjectBadge subject={result.subject as Subject} size="sm" />
@@ -438,7 +427,7 @@ export default function CanvasPage() {
           <div className="relative max-w-6xl w-full max-h-[90vh] flex flex-col items-center gap-4"
             onClick={e => e.stopPropagation()}>
             <img
-              src={`data:${result.image_mime_type};base64,${result.image_base64}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL || ""}${result.image_url}`}
               alt={result.title}
               className="rounded-2xl object-contain max-h-[75vh] w-full shadow-2xl border border-white/10"
             />
