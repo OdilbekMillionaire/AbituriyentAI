@@ -764,6 +764,7 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
         "timeline":       data.get("timeline", []),
         "key_figures":    data.get("key_figures", []),
         "image_base64":   image_b64,
+        "image_bytes":    base64.b64decode(image_b64) if image_b64 else b"",
         "image_mime_type": image_mime,
         "subject":        subject,
         "topic":          topic,

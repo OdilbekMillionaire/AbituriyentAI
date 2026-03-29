@@ -57,13 +57,11 @@ async def generate_canvas_endpoint(
     except RuntimeError as exc:
         raise HTTPException(503, str(exc))
 
-    # Store image bytes and return a URL key instead of base64
-    image_b64: str = result.get("image_base64", "")
+    # Store raw image bytes directly (no base64 round-trip)
+    raw_bytes: bytes = result.get("image_bytes", b"")
     image_mime: str = result.get("image_mime_type", "image/jpeg")
     image_url = ""
-    if image_b64:
-        import base64
-        raw_bytes = base64.b64decode(image_b64)
+    if raw_bytes:
         key = str(uuid.uuid4())
         _image_store[key] = (raw_bytes, image_mime)
         # Keep store bounded — drop oldest if over 50 entries
@@ -91,4 +89,12 @@ async def get_canvas_image(key: str):
     if not entry:
         raise HTTPException(404, "Image not found or expired")
     raw_bytes, mime_type = entry
-    return Response(content=raw_bytes, media_type=mime_type)
+    return Response(
+        content=raw_bytes,
+        media_type=mime_type,
+        headers={
+            "Content-Length": str(len(raw_bytes)),
+            "Cache-Control": "no-cache",
+            "Access-Control-Allow-Origin": "*",
+        },
+    )
