@@ -742,9 +742,9 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
                 image_b64 = base64.b64encode(image_bytes).decode("utf-8")
                 break
         except Exception as exc:
-            logger.error("Imagen model %s failed — type: %s | error: %s", _model, type(exc).__name__, exc)
+            print(f"[IMAGEN ERROR] model={_model} type={type(exc).__name__} error={exc}", flush=True)
     if not image_b64:
-        logger.error("All Imagen models failed for topic: %s | prompt: %s", topic, imagen_prompt[:100])
+        print(f"[IMAGEN FAILED] All models failed. topic={topic}", flush=True)
 
     return {
         "title":          data.get("title", topic),
