@@ -727,14 +727,15 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
     print(f"[CANVAS IMG] pollinations url built seed={_seed}", flush=True)
 
     return {
-        "title":       data.get("title", topic),
-        "description": data.get("description", ""),
-        "facts":       data.get("facts", []),
-        "timeline":    data.get("timeline", []),
-        "key_figures": data.get("key_figures", []),
-        "image_url":   image_url,
-        "subject":     subject,
-        "topic":       topic,
+        "title":          data.get("title", topic),
+        "description":    data.get("description", ""),
+        "facts":          data.get("facts", []),
+        "timeline":       data.get("timeline", []),
+        "key_figures":    data.get("key_figures", []),
+        "image_url":      image_url,
+        "imagen_prompt":  imagen_prompt,
+        "subject":        subject,
+        "topic":          topic,
     }
 
 

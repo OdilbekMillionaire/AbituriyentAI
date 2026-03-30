@@ -26,6 +26,7 @@ interface CanvasResult {
   timeline: CanvasEvent[];
   key_figures: string[];
   image_url: string;
+  imagen_prompt: string;
   subject: string;
   topic: string;
 }
@@ -90,6 +91,8 @@ export default function CanvasPage() {
 
   const [result, setResult]       = useState<CanvasResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [imageUrl, setImageUrl]   = useState<string>("");
   const [error, setError]         = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
 
@@ -109,23 +112,42 @@ export default function CanvasPage() {
     setIsGenerating(true);
     setError(null);
     setResult(null);
+    setImageUrl("");
     try {
       const res = await canvasApi.generate({ subject, topic: activeTopic, language });
-      setResult(res.data as CanvasResult);
+      const data = res.data as CanvasResult;
+      setResult(data);
+      setIsGenerating(false);
+
+      // Generate image separately via Vercel API route
+      if (data.imagen_prompt) {
+        setIsLoadingImage(true);
+        try {
+          const imgRes = await fetch("/api/canvas-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: data.imagen_prompt }),
+          });
+          const imgData = await imgRes.json();
+          if (imgData.image_url) setImageUrl(imgData.image_url);
+        } catch {
+          // image failed silently — canvas still shows without image
+        } finally {
+          setIsLoadingImage(false);
+        }
+      }
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
       setError(typeof msg === "string" ? msg : tr("error"));
-    } finally {
       setIsGenerating(false);
     }
   }
 
   function handleDownload() {
-    if (!result?.image_url) return;
+    if (!imageUrl) return;
     const link = document.createElement("a");
-    link.href = result.image_url;
-    link.download = `canvas-${result.topic.slice(0, 30).replace(/\s+/g, "-")}.jpg`;
-    link.target = "_blank";
+    link.href = imageUrl;
+    link.download = `canvas-${result?.topic.slice(0, 30).replace(/\s+/g, "-") ?? "image"}.jpg`;
     link.click();
   }
 
@@ -301,16 +323,22 @@ export default function CanvasPage() {
             <div ref={canvasRef} className="space-y-4">
               {/* Image */}
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                {result.image_url ? (
+                {imageUrl ? (
                   <img
-                    src={result.image_url}
+                    src={imageUrl}
                     alt={result.title}
                     className="w-full object-cover min-h-[220px] max-h-[220px] sm:max-h-[300px] lg:max-h-[380px]"
-                    onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 ) : (
                   <div className="w-full h-[220px] sm:h-[300px] lg:h-[380px] bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 flex items-center justify-center">
-                    <Sparkles className="w-16 h-16 text-purple-400/40" />
+                    {isLoadingImage ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="w-10 h-10 text-purple-400 animate-spin" />
+                        <span className="text-white/40 text-xs">Rasm yaratilmoqda...</span>
+                      </div>
+                    ) : (
+                      <Sparkles className="w-16 h-16 text-purple-400/40" />
+                    )}
                   </div>
                 )}
                 {/* Overlay gradient with title */}
@@ -321,21 +349,25 @@ export default function CanvasPage() {
                 </div>
                 {/* Action buttons */}
                 <div className="absolute top-3 right-3 flex gap-1.5">
-                  <button
-                    onClick={() => setFullscreen(true)}
-                    className="flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white px-2 py-1.5 rounded-full text-xs font-medium hover:bg-black/80 transition-colors border border-white/20"
-                    title="Katta ko'rish"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={handleDownload}
-                    className="flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white px-2 py-1.5 rounded-full text-xs font-medium hover:bg-black/80 transition-colors border border-white/20"
-                    title={tr("canvas_download")}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{tr("canvas_download")}</span>
-                  </button>
+                  {imageUrl && (
+                    <button
+                      onClick={() => setFullscreen(true)}
+                      className="flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white px-2 py-1.5 rounded-full text-xs font-medium hover:bg-black/80 transition-colors border border-white/20"
+                      title="Katta ko'rish"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {imageUrl && (
+                    <button
+                      onClick={handleDownload}
+                      className="flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white px-2 py-1.5 rounded-full text-xs font-medium hover:bg-black/80 transition-colors border border-white/20"
+                      title={tr("canvas_download")}
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{tr("canvas_download")}</span>
+                    </button>
+                  )}
                   <button
                     onClick={handleGenerate}
                     className="flex items-center gap-1 bg-purple-600/70 backdrop-blur-sm text-white px-2 py-1.5 rounded-full text-xs font-medium hover:bg-purple-600 transition-colors border border-purple-400/30"
@@ -413,7 +445,7 @@ export default function CanvasPage() {
       </div>
 
       {/* ── Fullscreen image overlay ──────────────────────────────────────── */}
-      {fullscreen && result && (
+      {fullscreen && result && imageUrl && (
         <div
           className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
           onClick={() => setFullscreen(false)}
@@ -427,7 +459,7 @@ export default function CanvasPage() {
           <div className="relative max-w-6xl w-full max-h-[90vh] flex flex-col items-center gap-4"
             onClick={e => e.stopPropagation()}>
             <img
-              src={result.image_url}
+              src={imageUrl}
               alt={result.title}
               className="rounded-2xl object-contain max-h-[75vh] w-full shadow-2xl border border-white/10"
             />

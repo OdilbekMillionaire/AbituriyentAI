@@ -27,6 +27,7 @@ class CanvasResponse(BaseModel):
     timeline: list[dict]
     key_figures: list[str]
     image_url: str
+    imagen_prompt: str
     subject: str
     topic: str
 
@@ -54,6 +55,7 @@ async def generate_canvas_endpoint(
         timeline=result["timeline"],
         key_figures=result["key_figures"],
         image_url=result.get("image_url", ""),
+        imagen_prompt=result.get("imagen_prompt", ""),
         subject=result["subject"],
         topic=result["topic"],
     )
