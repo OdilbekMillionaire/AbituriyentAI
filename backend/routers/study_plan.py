@@ -97,7 +97,7 @@ class AiAdviceResponse(BaseModel):
 
 @router.get("", response_model=StudyPlanResponse, summary="Shaxsiy o'quv rejasi")
 async def get_study_plan(
-    exam_date: str = Query(description="DTM sanasi (YYYY-MM-DD formatida)"),
+    exam_date: str = Query(description="BMBA sanasi (YYYY-MM-DD formatida)"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> StudyPlanResponse:
@@ -226,7 +226,7 @@ async def get_study_plan(
 
 @router.get("/ai-advice", response_model=AiAdviceResponse, summary="AI shaxsiy o'quv maslahati")
 async def get_ai_advice(
-    exam_date: str = Query(description="DTM sanasi (YYYY-MM-DD formatida)"),
+    exam_date: str = Query(description="BMBA sanasi (YYYY-MM-DD formatida)"),
     language: str = Query(default="uz"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),

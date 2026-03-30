@@ -1,7 +1,7 @@
 {
-  "name": "AbituriyentAI — DTM Tayyorgarlik",
+  "name": "AbituriyentAI — BMBA Tayyorgarlik",
   "short_name": "AbituriyentAI",
-  "description": "O'zbekiston DTM imtihoniga AI yordamida tayyorlaning",
+  "description": "O'zbekiston BMBA imtihoniga AI yordamida tayyorlaning",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#f8fafc",

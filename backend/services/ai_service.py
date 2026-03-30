@@ -137,7 +137,7 @@ async def get_ai_tutor_response(
             "- Muhim sanalar va ismlarni **qalin** bilan ajrating\n"
             "- Voqealar ketma-ketligini ro'yxat yoki jadval shaklida bering\n"
             "- Sabab-oqibat bog'liqligini > blockquote ichida yozing\n"
-            "- DTM uchun muhim faktlarni ⭐ belgisi bilan belgilang"
+            "- BMBA uchun muhim faktlarni ⭐ belgisi bilan belgilang"
         ),
         "MOTHER_TONGUE": (
             "- Grammatik qoidalarni **Qoida:** sarlavhasi bilan boshlang\n"
@@ -159,7 +159,7 @@ O'zbekiston BMBA 2026 imtihoniga tayyorlanayotgan abituriyentlarga {subject_labe
 - Asosiy tushunchani ## sarlavha bilan boshlang
 - Tushuntirish uchun tekis paragraflar ishlating
 {subject_format_hint}
-- Oxirida "💡 **DTM uchun eslab qoling:**" bo'limi qo'shing (1-2 ta eng muhim fakt)
+- Oxirida "💡 **BMBA uchun eslab qoling:**" bo'limi qo'shing (1-2 ta eng muhim fakt)
 - Faqat Markdown ishlating, boshqa formatlash yo'q"""
 
     try:
@@ -1052,7 +1052,7 @@ Faqat quyidagi JSON formatida qaytaring (boshqa matn yo'q):
 Qoidalar:
 - So'z faqat lotin harflarida bo'lsin (A-Z), bo'sh joy bo'lmasdan
 - So'z 4-12 harf oralig'ida bo'lsin
-- DTM {subject_label} faniga oid atama yoki tushuncha bo'lsin
+- BMBA {subject_label} faniga oid atama yoki tushuncha bo'lsin
 - Izoh 1 jumlada bo'lsin, so'zning o'zini aytmasdan tushuntirsin"""
 
     try:

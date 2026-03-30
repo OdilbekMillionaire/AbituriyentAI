@@ -115,7 +115,7 @@ SAMPLE_QUESTIONS: list[dict] = [
         "is_competency_based": True,
         "tags": ["SYNTAX", "COMPOUND_SENTENCE"],
         "era_tag": None,
-        "source_decree": "DTM 2026 Ona tili kompetensiya §3.2",
+        "source_decree": "BMBA 2026 Ona tili kompetensiya §3.2",
     },
     {
         "subject": Subject.MOTHER_TONGUE,
@@ -154,7 +154,7 @@ SAMPLE_QUESTIONS: list[dict] = [
             "'Mashg'ulot' so'zida 9 ta harf bor: m-a-sh-g'-u-l-o-t. "
             "Tovush soni 8 ta — chunki 'g'' harfi yozuvda belgisiz qolgan tovush hisoblanadi, "
             "lekin 'sh' harfi 1 ta tovushni ifodalaydi (ikki harf — bitta tovush). "
-            "DTM testlarida harf va tovush sonini farqlash muhim."
+            "BMBA testlarida harf va tovush sonini farqlash muhim."
         ),
         "is_competency_based": False,
         "tags": ["PHONETICS", "SPELLING"],
@@ -207,7 +207,7 @@ SAMPLE_QUESTIONS: list[dict] = [
         "is_competency_based": True,
         "tags": ["SYNTAX", "SENTENCE_MEMBERS"],
         "era_tag": None,
-        "source_decree": "DTM 2026 Ona tili kompetensiya §3.2",
+        "source_decree": "BMBA 2026 Ona tili kompetensiya §3.2",
     },
     # Ona tili 9 — Imlo: qo'shma va juft so'zlar
     {
@@ -328,7 +328,7 @@ SAMPLE_QUESTIONS: list[dict] = [
         "is_competency_based": True,
         "tags": ["LOGIC", "SET_THEORY", "WORD_PROBLEM"],
         "era_tag": None,
-        "source_decree": "DTM 2026 Matematika mantiqiy kompetensiya §3.7",
+        "source_decree": "BMBA 2026 Matematika mantiqiy kompetensiya §3.7",
     },
     {
         "subject": Subject.MATHEMATICS,
@@ -389,7 +389,7 @@ SAMPLE_QUESTIONS: list[dict] = [
             "Bu trigonometriyaning asosiy birligi — Pifagor identifikatsiyasi: "
             "sin²α + cos²α = 1. "
             "Bu formula har qanday α qiymati uchun to'g'ri. "
-            "DTM testlarida eng ko'p uchraydigan trigonometrik formula."
+            "BMBA testlarida eng ko'p uchraydigan trigonometrik formula."
         ),
         "is_competency_based": False,
         "tags": ["TRIGONOMETRY", "IDENTITY"],
@@ -760,7 +760,7 @@ Bu gapda **metafora** ishlatilgan — ko'zlar va qor o'rtasidagi o'xshashlik (oz
 
 - Ko'chma ma'noli so'zlar lug'atlarda **ko'ch.** belgisi bilan belgilanadi
 - Badiiy adabiyotda ko'chma ma'no asarni boyitadi
-- DTM testlarida ko'chma ma'noli so'zni aniqlash uchun kontekstni diqqat bilan o'qing
+- BMBA testlarida ko'chma ma'noli so'zni aniqlash uchun kontekstni diqqat bilan o'qing
 """,
     },
     {
@@ -797,7 +797,7 @@ x² - 5x + 6 = 0 tenglamasi uchun:
 - x₁ · x₂ = 6
 - Ildizlar: x = 2 va x = 3 ✓
 
-## DTM maslahat
+## BMBA maslahat
 
 Viyeta teoremasi yordamida diskriminant hisoblamasdan ildizlar yig'indisi va ko'paytmasini topish mumkin — bu testda vaqt tejaydi!
 """,
@@ -840,9 +840,9 @@ Viyeta teoremasi yordamida diskriminant hisoblamasdan ildizlar yig'indisi va ko'
 
 ### 5. Xavfsizlik, millatlararo totuvlik va diniy bag'rikenglik
 
-## DTM uchun muhim
+## BMBA uchun muhim
 
-Bu strategiya DTM 2026 O'zbekiston tarixi testlarining **"Yangi O'zbekiston"** bo'limida faol qo'llaniladi. Sana va PF-60 raqamini eslab qoling!
+Bu strategiya BMBA 2026 O'zbekiston tarixi testlarining **"Yangi O'zbekiston"** bo'limida faol qo'llaniladi. Sana va PF-60 raqamini eslab qoling!
 
 > **Eslab qoling:** 2022-yil, 28-yanvar, PF-60, 5 ta yo'nalish
 """,

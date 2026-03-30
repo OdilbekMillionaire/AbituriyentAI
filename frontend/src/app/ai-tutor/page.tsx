@@ -153,14 +153,16 @@ function MessageBubble({ msg }: { msg: Message }) {
                     <span>{children}</span>
                   </li>
                 ),
-                code: ({ inline, children, ...props }: { inline?: boolean; children?: React.ReactNode; [k: string]: unknown }) =>
-                  inline ? (
-                    <code className="bg-slate-700 text-emerald-300 rounded px-1.5 py-0.5 text-xs font-mono" {...props}>{children}</code>
-                  ) : (
+                code: ({ className, children }) => {
+                  const isBlock = String(className ?? "").startsWith("language-");
+                  return isBlock ? (
                     <pre className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 overflow-x-auto my-2">
-                      <code className="text-emerald-300 text-xs font-mono" {...props}>{children}</code>
+                      <code className="text-emerald-300 text-xs font-mono">{children}</code>
                     </pre>
-                  ),
+                  ) : (
+                    <code className="bg-slate-700 text-emerald-300 rounded px-1.5 py-0.5 text-xs font-mono">{children}</code>
+                  );
+                },
                 blockquote: ({ children }) => (
                   <blockquote className="border-l-2 border-violet-500 pl-3 my-2 text-slate-400 italic text-sm">{children}</blockquote>
                 ),
@@ -223,7 +225,7 @@ function WelcomeState({
         {[
           { icon: <Brain className="w-3.5 h-3.5" />, label: "Batafsil tushuntirish" },
           { icon: <Zap className="w-3.5 h-3.5" />, label: "Misol va mashqlar" },
-          { icon: <GraduationCap className="w-3.5 h-3.5" />, label: "DTM tayyorgarligi" },
+          { icon: <GraduationCap className="w-3.5 h-3.5" />, label: "BMBA tayyorgarligi" },
         ].map((c) => (
           <div key={c.label} className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-full px-3.5 py-1.5 text-xs text-slate-300">
             <span className="text-violet-400">{c.icon}</span>

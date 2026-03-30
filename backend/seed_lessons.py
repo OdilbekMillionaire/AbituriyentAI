@@ -1,6 +1,6 @@
 """
 Seed comprehensive lessons for AbituriyentAI.
-DTM 2026 curriculum: Ona tili, Matematika, O'zbekiston Tarixi
+BMBA 2026 curriculum: Ona tili, Matematika, O'zbekiston Tarixi
 Run from backend/ directory: python seed_lessons.py
 """
 import asyncio
@@ -91,7 +91,7 @@ Undoshlar **jarangli** va **jarangsiz** bo'ladi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 1. So'zdagi harf soni ≠ tovush soni bo'lishi mumkin
 2. "Yaxshi" so'zida: 6 harf, 7 tovush (ya = y+a)
 3. Jarangli undoshlar so'z oxirida jarangsizlashadi: **kitob** [kitop]
@@ -150,7 +150,7 @@ Qo'shimcha sifatida kelganda **qo'shib** yoziladi:
 
 ---
 
-## DTM uchun eng ko'p chiqadigan qoidalar
+## BMBA uchun eng ko'p chiqadigan qoidalar
 
 > **"Bir"** so'zi:
 > - **bir xil** (ajratib) — "bir xil narsa"
@@ -249,7 +249,7 @@ Quyidagilardan qaysi biri to'g'ri yozilgan?
 
 ---
 
-## DTM uchun eslab qolish
+## BMBA uchun eslab qolish
 > Fe'l + **-ish** = ot: o'qi**sh**, yoz**ish**, kel**ish**
 > Sifat + **-lik** = ot: go'zal**lik**, katta**lik**
 """,
@@ -402,7 +402,7 @@ Ma'nosi yaqin, shakli farqli:
 - go'zal = chiroyli = suluv = husndor
 - yurmoq = ketmoq = qadam tashlash
 
-### DTM uchun:
+### BMBA uchun:
 > Sinonimlar stilistik farq qiladi:
 > - **vafot etdi** (rasmiy) = **o'ldi** (oddiy) = **jonini topshirdi** (badiiy)
 
@@ -484,7 +484,7 @@ Bu asar o'zbek tilshunosligining asosi hisoblanadi.
 
 ---
 
-## DTM uchun muhim faktlar
+## BMBA uchun muhim faktlar
 - Navoiy **o'zbek adabiy tilining asoschisi**
 - U **3 tilda** yozgan: o'zbek, fors, arab
 - **"Farhod va Shirin"** — Nizomiy va Dehlaviydan farqli, Farhod bosh qahramon
@@ -562,7 +562,7 @@ XIX asrning 2-yarmi — Rossiya bosqini arafasida **Toshkent va Qo'qon xonligi**
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 > "O'tkan kunlar" — o'zbek romanchiligining boshlanishi
 > Qodiriy 1938 yilda **siyosiy ayblov** bilan otib tashlangan, 1956 yilda oqlangan
 """,
@@ -640,7 +640,7 @@ Millat qizlarini ma'rifatga chorlash
 
 ---
 
-## DTM uchun muhim faktlar
+## BMBA uchun muhim faktlar
 - Cho'lpon **"Uyqu"** she'rida millatni g'aflatdan uyg'otishga chaqirdi
 - **1938 yil repressiya** jabrdiydasi — oqlangan 1957 yilda
 - O'zbek **she'riyati modernizmi**ning asoschisi
@@ -730,7 +730,7 @@ Asosiy gap tarkibiga kirmaydigan, munosabat bildiruvchi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 > **Ergash gap** bosh gapga bog'liq bo'lib, uning bir bo'lagi vazifasini bajaradi:
 > - **Ega ergash gap:** Kim kelgani ma'lum emas.
 > - **Kesim ergash gap:** Mening orzum shuki, men o'qishga kiraman.
@@ -811,7 +811,7 @@ Hech kimga turmaydi, ne'mat ham (B)
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 > **G'azal** — o'zbek klassik she'riyatining asosiy shakli
 > Navoiy g'azallarida **"Navoiy"** taxallusi oxirgi baytda ishlatiladi
 > Ruboiy — fors-tojik she'riyatidan o'zlashgan, **Umar Xayyom** bilan mashhur
@@ -883,7 +883,7 @@ x² + px + 12 = 0 tenglamaning bir ildizi 3 bo'lsa, ikkinchi ildizini toping.
 
 ---
 
-## Parametrli tenglamalar (DTM uchun)
+## Parametrli tenglamalar (BMBA uchun)
 **x² - 2ax + a² - 1 = 0**
 
 D = 4a² - 4(a² - 1) = 4 > 0 → har doim 2 ta ildiz
@@ -973,7 +973,7 @@ cos(α ± β) = cos α cos β ∓ sin α sin β
 
 ---
 
-## DTM uchun masalalar
+## BMBA uchun masalalar
 
 **1-misol:** sin α = 3/5 bo'lsa, cos α va tan α ni toping.
 - cos²α = 1 - 9/25 = 16/25 → cos α = **4/5**
@@ -1050,7 +1050,7 @@ log_a(b) = log_c(b) / log_c(a)  (asosni almashtirish)
 
 ---
 
-## Aniqlik sohalari (DTM uchun!)
+## Aniqlik sohalari (BMBA uchun!)
 
 Logarifmik funksiyaning aniqlik sohasi: **argument > 0**
 
@@ -1059,7 +1059,7 @@ x² - 4 > 0 → x² > 4 → **x < -2** yoki **x > 2**
 
 ---
 
-## DTM uchun masala
+## BMBA uchun masala
 
 **log₂(x) + log₂(x-2) = 3** ni yeching.
 
@@ -1133,7 +1133,7 @@ b_(n)² = b_(n-1) · b_(n+1)
 
 ---
 
-## DTM uchun masalalar
+## BMBA uchun masalalar
 
 **1-masala:** AP da a₁ = 3, d = 4 bo'lsa, S₂₀ = ?
 S₂₀ = 20·(2·3 + 19·4)/2 = 20·(6+76)/2 = 20·41 = **820**
@@ -1290,7 +1290,7 @@ Cⁿₖ = n! / (k! × (n-k)!)
 
 ---
 
-## DTM uchun masalalar
+## BMBA uchun masalalar
 
 **1-masala:** 5 kishidan 3 kishilik komissiya necta usulda tuziladi?
 C⁵₃ = 5!/(3!·2!) = 120/12 = **10**
@@ -1370,7 +1370,7 @@ To'g'ri burchakli uchburchak uchun: **R = c/2** (gipotenuza/2)
 
 ---
 
-## DTM uchun misollar
+## BMBA uchun misollar
 
 **1-masala:** r = 5 sm bo'lgan doiraning yuzi?
 S = π·25 = **25π sm²**
@@ -1444,7 +1444,7 @@ Grafik: y = x to'g'ri chizig'iga nisbatan simmetrik
 
 ---
 
-## DTM uchun masalalar
+## BMBA uchun masalalar
 
 **1-masala:** f(x) = x² - 4 funksiyaning aniqlik sohasi?
 Hamma x uchun ta'riflanadi → **D(f) = (-∞; +∞)**
@@ -1520,7 +1520,7 @@ Bu yerda **P(B|A)** — A bo'lganda B ning ehtimolligi.
 
 ---
 
-## DTM uchun misollar
+## BMBA uchun misollar
 
 **1-masala:** Qutida 6 qizil, 4 yashil shar. Tasodifiy shar olindi. Qizil bo'lish ehtimoli?
 P = 6/10 = **3/5 = 0.6**
@@ -1570,7 +1570,7 @@ Farq = (v₁ - v₂) · t  (v₁ > v₂)
 
 ---
 
-## DTM harakat masalalari
+## BMBA harakat masalalari
 
 **1-masala:** Ikki shahar 360 km. Birinchi mashina 60 km/h, ikkinchisi 80 km/h, bir-biriga qarab chiqdi. Qachon uchrashadilar?
 t = 360/(60+80) = 360/140 = **18/7 ≈ 2.57 soat**
@@ -1597,7 +1597,7 @@ t = 360/(60+80) = 360/140 = **18/7 ≈ 2.57 soat**
 
 ---
 
-## DTM ish masalalari
+## BMBA ish masalalari
 
 **1-masala:** Birinchi usta ishni 6 kunda, ikkinchisi 12 kunda bajaradi. Birga necha kunda?
 1/t = 1/6 + 1/12 = 2/12 + 1/12 = 3/12 = 1/4
@@ -1771,7 +1771,7 @@ Ipak yo'li faqat tovar emas, **g'oyalar va madaniyat** ham tashidi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 - Ipak yo'li — **mil.avv. II asr** dan boshlangan
 - O'zbekiston shaharlari yo'lning **markaziy qismi**da joylashgan
 - So'g'dlar — asosiy **vositachi savdogarlar**
@@ -1943,7 +1943,7 @@ O'rta Osiyo holati:
 
 ---
 
-## DTM uchun muhim faktlar
+## BMBA uchun muhim faktlar
 
 | Olim | Asosiy soha | Mashxur asar |
 |------|------------|-------------|
@@ -2043,7 +2043,7 @@ Amir Temur Samarqandni buyuk poytaxtga aylantirdi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 - Amir Temur: **1336** (Shahrisabz) — **1405** (Otror)
 - **Anqara jangi 1402** — Boyazidni asir oldi
 - **Ulug'bek rasadxonasi** — O'rta asrlar astronomiyasining cho'qqisi
@@ -2129,7 +2129,7 @@ O'rta Osiyoda **3 ta xonlik**:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 - Toshkent: **1865** (Chernayev)
 - Buxoro shartnomasi: **1868**
 - **Dukchi Eshon qo'zg'oloni: 1898**
@@ -2220,7 +2220,7 @@ Sovet hukumati milliy ziyolilarni qirdi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 - O'zSSR tashkil: **1924 yil 27-oktabr**
 - Birinchi rahbar: **Fayzulla Xo'jayev**
 - Repressiya: **1937–38** — Qodiriy, Cho'lpon, Fitrat
@@ -2296,7 +2296,7 @@ Sovet hukumati milliy ziyolilarni qirdi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 - Mustaqillik: **1991 yil 31-avgustda** e'lon qilindi
 - Milliy bayram: **1-sentabr**
 - Birinchi Prezident: **Islam Karimov** (1991–2016)
@@ -2381,7 +2381,7 @@ Sovet hukumati milliy ziyolilarni qirdi:
 
 ---
 
-## DTM uchun muhim
+## BMBA uchun muhim
 - Mirziyoyev prezident: **2016 yil 4-dekabr**
 - **PF-60** — 2022-2026 taraqqiyot strategiyasi
 - Yangi Konstitutsiya: **2023 yil 30-aprel** referendum
