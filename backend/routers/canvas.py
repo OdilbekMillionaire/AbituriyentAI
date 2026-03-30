@@ -1,29 +1,30 @@
 """
 Abituriyent Canvas — AI-generated educational infographic.
-POST /canvas/generate  — Generate canvas, returns image_key instead of base64
-GET  /canvas/image/{key} — Serve the raw image bytes
+POST /canvas/generate  — Generate canvas, stores image in DB, returns image_url
+GET  /canvas/image/{key} — Serve image bytes directly from DB
 """
 from __future__ import annotations
 
+import base64
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
+from sqlalchemy import text
 
+from database import AsyncSessionLocal
 from routers.auth import get_current_user
 from models.user import User
 from services.ai_service import generate_canvas
 
 router = APIRouter()
 
-# In-memory image store: {key: (bytes, mime_type)}
-_image_store: dict[str, tuple[bytes, str]] = {}
-
 
 class CanvasRequest(BaseModel):
-    subject: str          # MOTHER_TONGUE | MATHEMATICS | HISTORY
+    subject: str
     topic: str
-    language: str = "uz"  # uz | ru | en | qq
+    language: str = "uz"
 
 
 class CanvasResponse(BaseModel):
@@ -32,9 +33,46 @@ class CanvasResponse(BaseModel):
     facts: list[dict]
     timeline: list[dict]
     key_figures: list[str]
-    image_url: str        # /canvas/image/{key} — served as real HTTP image
+    image_url: str
     subject: str
     topic: str
+
+
+async def _ensure_table() -> None:
+    async with AsyncSessionLocal() as s:
+        await s.execute(text("""
+            CREATE TABLE IF NOT EXISTS canvas_images (
+                id TEXT PRIMARY KEY,
+                image_b64 TEXT NOT NULL,
+                mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+                created_at TIMESTAMPTZ DEFAULT now()
+            )
+        """))
+        await s.commit()
+
+
+async def _save_image(key: str, raw_bytes: bytes, mime: str) -> None:
+    b64 = base64.b64encode(raw_bytes).decode()
+    async with AsyncSessionLocal() as s:
+        await s.execute(
+            text("INSERT INTO canvas_images(id, image_b64, mime_type) VALUES(:id, :b64, :mime)"),
+            {"id": key, "b64": b64, "mime": mime},
+        )
+        await s.commit()
+        # Clean up images older than 24h
+        await s.execute(text("DELETE FROM canvas_images WHERE created_at < now() - interval '24 hours'"))
+        await s.commit()
+
+
+async def _load_image(key: str) -> tuple[bytes, str] | None:
+    async with AsyncSessionLocal() as s:
+        row = (await s.execute(
+            text("SELECT image_b64, mime_type FROM canvas_images WHERE id = :id"),
+            {"id": key},
+        )).fetchone()
+    if not row:
+        return None
+    return base64.b64decode(row[0]), row[1]
 
 
 @router.post("/generate", response_model=CanvasResponse)
@@ -49,25 +87,18 @@ async def generate_canvas_endpoint(
         raise HTTPException(400, "topic cannot be empty")
 
     try:
-        result = await generate_canvas(
-            subject=req.subject,
-            topic=req.topic,
-            language=req.language,
-        )
+        result = await generate_canvas(subject=req.subject, topic=req.topic, language=req.language)
     except RuntimeError as exc:
         raise HTTPException(503, str(exc))
 
-    # Store raw image bytes directly (no base64 round-trip)
     raw_bytes: bytes = result.get("image_bytes", b"")
     image_mime: str = result.get("image_mime_type", "image/jpeg")
     image_url = ""
+
     if raw_bytes:
         key = str(uuid.uuid4())
-        _image_store[key] = (raw_bytes, image_mime)
-        # Keep store bounded — drop oldest if over 50 entries
-        if len(_image_store) > 50:
-            oldest = next(iter(_image_store))
-            del _image_store[oldest]
+        await _ensure_table()
+        await _save_image(key, raw_bytes, image_mime)
         image_url = f"/canvas/image/{key}"
 
     return CanvasResponse(
@@ -84,8 +115,8 @@ async def generate_canvas_endpoint(
 
 @router.get("/image/{key}")
 async def get_canvas_image(key: str):
-    """Serve a previously generated canvas image by key."""
-    entry = _image_store.get(key)
+    await _ensure_table()
+    entry = await _load_image(key)
     if not entry:
         raise HTTPException(404, "Image not found or expired")
     raw_bytes, mime_type = entry
@@ -94,7 +125,7 @@ async def get_canvas_image(key: str):
         media_type=mime_type,
         headers={
             "Content-Length": str(len(raw_bytes)),
-            "Cache-Control": "no-cache",
+            "Cache-Control": "public, max-age=86400",
             "Access-Control-Allow-Origin": "*",
         },
     )
