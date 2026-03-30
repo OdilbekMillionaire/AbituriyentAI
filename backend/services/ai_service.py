@@ -126,20 +126,41 @@ async def get_ai_tutor_response(
         if context_parts else ""
     )
 
-    prompt = f"""Siz AbituriyentAI platformasining AI o'qituvchisisiz.
-Siz O'zbekiston BMBA 2026 imtihoniga tayyorlanayotgan abituriyentlarga
-{subject_label} fanidan yordam berasiz.
+    subject_format_hint = {
+        "MATHEMATICS": (
+            "- Formulalarni LaTeX bilan yozing: inline uchun $formula$, blok uchun $$formula$$\n"
+            "- Yechim bosqichlarini **1. 2. 3.** raqamli ro'yxat bilan ko'rsating\n"
+            "- Har bir qadam oldiga **Qadam N:** sarlavha qo'ying\n"
+            "- Natija yoki javobni **qalin** yoki > blockquote bilan ajrating"
+        ),
+        "HISTORY": (
+            "- Muhim sanalar va ismlarni **qalin** bilan ajrating\n"
+            "- Voqealar ketma-ketligini ro'yxat yoki jadval shaklida bering\n"
+            "- Sabab-oqibat bog'liqligini > blockquote ichida yozing\n"
+            "- DTM uchun muhim faktlarni ⭐ belgisi bilan belgilang"
+        ),
+        "MOTHER_TONGUE": (
+            "- Grammatik qoidalarni **Qoida:** sarlavhasi bilan boshlang\n"
+            "- Misollarni `kod` bloki ichida ko'rsating (masalan: `Men boraman — I go`)\n"
+            "- Istisnolarni ⚠️ belgisi bilan belgilang\n"
+            "- So'z tahlili uchun jadval ishlating"
+        ),
+    }.get(subject, "- Asosiy fikrlarni **qalin** bilan, ro'yxat va sarlavhalar bilan ajrating")
+
+    prompt = f"""Siz AbituriyentAI platformasining ekspert AI o'qituvchisisiz.
+O'zbekiston BMBA 2026 imtihoniga tayyorlanayotgan abituriyentlarga {subject_label} fanidan yordam berasiz.
 
 {_lang_instruction(language)}{context_block}
 
-Talaba savoli: {question}
+**Talaba savoli:** {question}
 
-Ko'rsatmalar:
-- Qisqa va aniq javob bering (3-5 jumla).
-- Agar yuqoridagi darslik mazmunida javob bo'lsa, shu asosda javob bering.
-- Agar savol imtihon bilan bog'liq bo'lsa, BMBA formatiga mos misol keltiring.
-- Formulalar yoki sanalarni aniq ko'rsating.
-- Sahifani bezash uchun markdown dan foydalaning (bold, list)."""
+**MUHIM — Javob formati (Markdown):**
+- Javobni aniq strukturalangan Markdown formatida yazing
+- Asosiy tushunchani ## sarlavha bilan boshlang
+- Tushuntirish uchun tekis paragraflar ishlating
+{subject_format_hint}
+- Oxirida "💡 **DTM uchun eslab qoling:**" bo'limi qo'shing (1-2 ta eng muhim fakt)
+- Faqat Markdown ishlating, boshqa formatlash yo'q"""
 
     try:
         response = await client.aio.models.generate_content(

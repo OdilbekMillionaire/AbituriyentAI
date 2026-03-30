@@ -6,6 +6,10 @@ import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import {
   ArrowLeft, Send, Mic, MicOff, Paperclip, X, Settings,
   BookOpen, Sparkles, Trash2, Copy, Check,
@@ -128,9 +132,51 @@ function MessageBubble({ msg }: { msg: Message }) {
   return (
     <div className="flex gap-3 px-4 sm:px-6 group">
       <AIAvatar />
-      <div className="flex-1 min-w-0 max-w-[80%]">
-        <div className="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-sm px-4 py-3.5 text-sm leading-relaxed text-slate-100 shadow-sm whitespace-pre-wrap">
-          {msg.content}
+      <div className="flex-1 min-w-0 max-w-[85%]">
+        <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
+          <div className="prose-ai">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+              components={{
+                h1: ({ children }) => <h1 className="text-base font-bold text-white mb-2 mt-1">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-sm font-bold text-violet-300 mb-2 mt-3 flex items-center gap-1.5"><span className="w-1 h-4 bg-violet-500 rounded-full inline-block" />{children}</h2>,
+                h3: ({ children }) => <h3 className="text-sm font-semibold text-indigo-300 mb-1.5 mt-2">{children}</h3>,
+                p: ({ children }) => <p className="text-sm text-slate-200 leading-relaxed mb-2 last:mb-0">{children}</p>,
+                strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                em: ({ children }) => <em className="italic text-slate-300">{children}</em>,
+                ul: ({ children }) => <ul className="my-2 space-y-1 pl-1">{children}</ul>,
+                ol: ({ children }) => <ol className="my-2 space-y-1 pl-1 list-decimal list-inside">{children}</ol>,
+                li: ({ children }) => (
+                  <li className="text-sm text-slate-200 leading-relaxed flex gap-2">
+                    <span className="text-violet-400 mt-1 flex-shrink-0">▸</span>
+                    <span>{children}</span>
+                  </li>
+                ),
+                code: ({ inline, children, ...props }: { inline?: boolean; children?: React.ReactNode; [k: string]: unknown }) =>
+                  inline ? (
+                    <code className="bg-slate-700 text-emerald-300 rounded px-1.5 py-0.5 text-xs font-mono" {...props}>{children}</code>
+                  ) : (
+                    <pre className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 overflow-x-auto my-2">
+                      <code className="text-emerald-300 text-xs font-mono" {...props}>{children}</code>
+                    </pre>
+                  ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-2 border-violet-500 pl-3 my-2 text-slate-400 italic text-sm">{children}</blockquote>
+                ),
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-3">
+                    <table className="w-full text-xs border-collapse">{children}</table>
+                  </div>
+                ),
+                th: ({ children }) => <th className="bg-slate-700 text-slate-200 font-semibold px-3 py-2 text-left border border-slate-600">{children}</th>,
+                td: ({ children }) => <td className="text-slate-300 px-3 py-2 border border-slate-700">{children}</td>,
+                hr: () => <hr className="border-slate-700 my-3" />,
+              }}
+            >
+              {msg.content}
+            </ReactMarkdown>
+          </div>
         </div>
         <div className="flex items-center gap-3 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <span className="text-[10px] text-slate-500">{formatTime(msg.timestamp)}</span>

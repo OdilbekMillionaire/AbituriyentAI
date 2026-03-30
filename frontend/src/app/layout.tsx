@@ -7,6 +7,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 import { LangProvider } from "@/lib/lang";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
