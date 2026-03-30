@@ -716,58 +716,25 @@ imagen_prompt must always be in English and very detailed (50-80 words). CRITICA
     _no_text_suffix = " No text, no letters, no words, no labels, no captions, no writing anywhere in the image."
     imagen_prompt = _raw_prompt.rstrip(".") + _no_text_suffix
 
-    # ── Step 2: Generate image with Imagen 4 Fast ────────────────────────────
-    image_b64 = ""
-    image_mime = "image/jpeg"
-    _imagen_models = [
-        "imagen-4.0-fast-generate-001",
-        "imagen-4.0-generate-001",
-        "imagen-3.0-fast-generate-001",
-    ]
-    for _model in _imagen_models:
-        try:
-            def _imagen_call(m=_model):
-                return client.models.generate_images(
-                    model=m,
-                    prompt=imagen_prompt,
-                    config=types.GenerateImagesConfig(
-                        number_of_images=1,
-                        aspect_ratio="16:9",
-                        output_mime_type="image/jpeg",
-                    ),
-                )
-            img_response = await asyncio.to_thread(_imagen_call)
-            imgs = img_response.generated_images
-            image_bytes = imgs[0].image.image_bytes if imgs else None
-            if image_bytes:
-                # Detect actual format from magic bytes
-                if image_bytes[:3] == b'\xff\xd8\xff':
-                    image_mime = "image/jpeg"
-                elif image_bytes[:8] == b'\x89PNG\r\n\x1a\n':
-                    image_mime = "image/png"
-                elif image_bytes[:4] == b'RIFF' and image_bytes[8:12] == b'WEBP':
-                    image_mime = "image/webp"
-                else:
-                    image_mime = "image/jpeg"
-                print(f"[IMAGEN OK] model={_model} size={len(image_bytes)} mime={image_mime}", flush=True)
-                image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-                break
-        except Exception as exc:
-            print(f"[IMAGEN ERROR] model={_model} type={type(exc).__name__} error={exc}", flush=True)
-    if not image_b64:
-        print(f"[IMAGEN FAILED] All models failed. topic={topic}", flush=True)
+    # ── Step 2: Build Pollinations.ai image URL (free, no binary serving) ───────
+    import urllib.parse
+    _seed = abs(hash(topic)) % 1_000_000
+    _encoded = urllib.parse.quote(imagen_prompt, safe="")
+    image_url = (
+        f"https://image.pollinations.ai/prompt/{_encoded}"
+        f"?width=1024&height=576&nologo=true&seed={_seed}"
+    )
+    print(f"[CANVAS IMG] pollinations url built seed={_seed}", flush=True)
 
     return {
-        "title":          data.get("title", topic),
-        "description":    data.get("description", ""),
-        "facts":          data.get("facts", []),
-        "timeline":       data.get("timeline", []),
-        "key_figures":    data.get("key_figures", []),
-        "image_base64":   image_b64,
-        "image_bytes":    base64.b64decode(image_b64) if image_b64 else b"",
-        "image_mime_type": image_mime,
-        "subject":        subject,
-        "topic":          topic,
+        "title":       data.get("title", topic),
+        "description": data.get("description", ""),
+        "facts":       data.get("facts", []),
+        "timeline":    data.get("timeline", []),
+        "key_figures": data.get("key_figures", []),
+        "image_url":   image_url,
+        "subject":     subject,
+        "topic":       topic,
     }
 
 

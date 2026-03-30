@@ -122,9 +122,8 @@ export default function CanvasPage() {
 
   function handleDownload() {
     if (!result?.image_url) return;
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
     const link = document.createElement("a");
-    link.href = `${apiBase}${result.image_url}`;
+    link.href = result.image_url;
     link.download = `canvas-${result.topic.slice(0, 30).replace(/\s+/g, "-")}.jpg`;
     link.target = "_blank";
     link.click();
@@ -304,9 +303,10 @@ export default function CanvasPage() {
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                 {result.image_url ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_URL || ""}${result.image_url}`}
+                    src={result.image_url}
                     alt={result.title}
                     className="w-full object-cover min-h-[220px] max-h-[220px] sm:max-h-[300px] lg:max-h-[380px]"
+                    onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 ) : (
                   <div className="w-full h-[220px] sm:h-[300px] lg:h-[380px] bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 flex items-center justify-center">
@@ -427,7 +427,7 @@ export default function CanvasPage() {
           <div className="relative max-w-6xl w-full max-h-[90vh] flex flex-col items-center gap-4"
             onClick={e => e.stopPropagation()}>
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL || ""}${result.image_url}`}
+              src={result.image_url}
               alt={result.title}
               className="rounded-2xl object-contain max-h-[75vh] w-full shadow-2xl border border-white/10"
             />
