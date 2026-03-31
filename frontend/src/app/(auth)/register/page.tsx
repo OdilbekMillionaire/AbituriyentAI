@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { authApi, setToken } from "@/lib/api";
-import { registerWithEmail, signInWithGoogle } from "@/lib/firebase";
+import { registerWithEmail, signInWithGoogle, getGoogleRedirectResult } from "@/lib/firebase";
 import { useLang } from "@/lib/lang";
 import { LangToggle } from "@/components/ui/LangToggle";
 
@@ -21,6 +21,16 @@ export default function RegisterPage() {
 
   const passwordStrength =
     form.password.length >= 8 ? "strong" : form.password.length >= 4 ? "medium" : "weak";
+
+  // Handle users returning from Google redirect (popup-blocked fallback)
+  useEffect(() => {
+    getGoogleRedirectResult().then(result => {
+      if (!result) return;
+      setIsGoogleLoading(true);
+      exchangeToken(result.idToken, result.displayName).catch(() => setIsGoogleLoading(false));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function exchangeToken(idToken: string, displayName?: string | null) {
     const response = await authApi.firebaseAuth(idToken, displayName);
