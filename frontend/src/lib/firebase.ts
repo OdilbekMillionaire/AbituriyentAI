@@ -3,11 +3,12 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
   signOut as firebaseSignOut,
+  type User,
 } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -29,40 +30,73 @@ export const auth = getAuth(app);
 if (typeof window !== "undefined") {
   isSupported().then(yes => { if (yes) getAnalytics(app); });
 }
+
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Key stored in sessionStorage to track a pending Google redirect sign-in.
+// sessionStorage survives the redirect but is cleared when the tab closes.
+const GOOGLE_PENDING_KEY = "g_auth_redirect_pending";
+
+// ── Google Sign-In ─────────────────────────────────────────────────────────────
 
 /**
- * Sign in with Google via full-page redirect (no popup).
- * Eliminates COOP/popup-blocker issues entirely.
- * Call getGoogleRedirectResult() on mount to complete the sign-in.
+ * Start Google sign-in via full-page redirect.
+ * Sets a sessionStorage flag so the auth page knows to wait for the result.
  */
 export async function signInWithGoogle(): Promise<void> {
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem(GOOGLE_PENDING_KEY, "1");
+  }
   await signInWithRedirect(auth, googleProvider);
 }
 
 /**
- * Call on mount in auth pages to catch users returning from Google redirect.
- * Returns null if there is no pending redirect result.
+ * Called on mount in auth pages.
+ * If a Google redirect is pending, waits for Firebase to sign the user in
+ * via onAuthStateChanged and returns their ID token.
+ * Returns null immediately if no redirect was pending.
  */
-export async function getGoogleRedirectResult(): Promise<{ idToken: string; displayName: string | null } | null> {
-  try {
-    const result = await getRedirectResult(auth);
-    if (!result) return null;
-    const idToken = await result.user.getIdToken();
-    return { idToken, displayName: result.user.displayName };
-  } catch {
-    return null;
-  }
+export function waitForGoogleRedirect(
+  callback: (result: { idToken: string; displayName: string | null }) => void,
+  onError: () => void,
+): (() => void) | null {
+  if (typeof window === "undefined") return null;
+  if (!sessionStorage.getItem(GOOGLE_PENDING_KEY)) return null;
+
+  // Flag is present — user is returning from Google redirect.
+  // Firebase will automatically sign them in and fire onAuthStateChanged.
+  const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
+    if (!user) return; // Firebase fires null first, then the signed-in user
+    sessionStorage.removeItem(GOOGLE_PENDING_KEY);
+    unsubscribe();
+    try {
+      const idToken = await user.getIdToken();
+      callback({ idToken, displayName: user.displayName });
+    } catch {
+      onError();
+    }
+  });
+
+  // Safety timeout: if Firebase never resolves in 15s, clean up
+  const timer = setTimeout(() => {
+    unsubscribe();
+    sessionStorage.removeItem(GOOGLE_PENDING_KEY);
+    onError();
+  }, 15000);
+
+  return () => {
+    unsubscribe();
+    clearTimeout(timer);
+  };
 }
 
-/** Register with email + password via Firebase, then return the ID token. */
+// ── Email auth ─────────────────────────────────────────────────────────────────
+
 export async function registerWithEmail(
   email: string,
   password: string,
-  displayName: string
+  displayName: string,
 ): Promise<{ idToken: string; displayName: string }> {
   const result = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(result.user, { displayName });
@@ -70,17 +104,15 @@ export async function registerWithEmail(
   return { idToken, displayName };
 }
 
-/** Sign in with email + password via Firebase and return the ID token. */
 export async function loginWithEmail(
   email: string,
-  password: string
+  password: string,
 ): Promise<{ idToken: string; displayName: string | null }> {
   const result = await signInWithEmailAndPassword(auth, email, password);
   const idToken = await result.user.getIdToken();
   return { idToken, displayName: result.user.displayName };
 }
 
-/** Sign out from Firebase. */
 export async function firebaseLogout(): Promise<void> {
   await firebaseSignOut(auth);
 }

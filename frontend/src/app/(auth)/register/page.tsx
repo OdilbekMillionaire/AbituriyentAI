@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { authApi, setToken } from "@/lib/api";
-import { registerWithEmail, signInWithGoogle, getGoogleRedirectResult } from "@/lib/firebase";
+import { registerWithEmail, signInWithGoogle, waitForGoogleRedirect } from "@/lib/firebase";
 import { useLang } from "@/lib/lang";
 import { LangToggle } from "@/components/ui/LangToggle";
 
@@ -22,13 +22,22 @@ export default function RegisterPage() {
   const passwordStrength =
     form.password.length >= 8 ? "strong" : form.password.length >= 4 ? "medium" : "weak";
 
-  // Handle users returning from Google redirect (popup-blocked fallback)
+  // Complete Google sign-in when user returns from redirect
   useEffect(() => {
-    getGoogleRedirectResult().then(result => {
-      if (!result) return;
-      setIsGoogleLoading(true);
-      exchangeToken(result.idToken, result.displayName).catch(() => setIsGoogleLoading(false));
-    });
+    const cleanup = waitForGoogleRedirect(
+      ({ idToken, displayName }) => {
+        setIsGoogleLoading(true);
+        exchangeToken(idToken, displayName).catch(() => {
+          setError(tr("auth_google_error"));
+          setIsGoogleLoading(false);
+        });
+      },
+      () => {
+        setError(tr("auth_google_error"));
+        setIsGoogleLoading(false);
+      },
+    );
+    return () => { cleanup?.(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { authApi, setToken } from "@/lib/api";
-import { loginWithEmail, signInWithGoogle, getGoogleRedirectResult } from "@/lib/firebase";
+import { loginWithEmail, signInWithGoogle, waitForGoogleRedirect } from "@/lib/firebase";
 import { useLang } from "@/lib/lang";
 import { LangToggle } from "@/components/ui/LangToggle";
 
@@ -20,13 +20,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  // Handle users returning from Google redirect (popup-blocked fallback)
+  // Complete Google sign-in when user returns from redirect
   useEffect(() => {
-    getGoogleRedirectResult().then(result => {
-      if (!result) return;
-      setIsGoogleLoading(true);
-      exchangeToken(result.idToken, result.displayName).catch(() => setIsGoogleLoading(false));
-    });
+    const cleanup = waitForGoogleRedirect(
+      ({ idToken, displayName }) => {
+        setIsGoogleLoading(true);
+        exchangeToken(idToken, displayName).catch(() => {
+          setError(tr("auth_google_error"));
+          setIsGoogleLoading(false);
+        });
+      },
+      () => {
+        setError(tr("auth_google_error"));
+        setIsGoogleLoading(false);
+      },
+    );
+    return () => { cleanup?.(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
