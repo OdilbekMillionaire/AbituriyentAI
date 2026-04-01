@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { authApi, setToken } from "@/lib/api";
-import { loginWithEmail, signInWithGoogle, waitForGoogleRedirect } from "@/lib/firebase";
+import { loginWithEmail, signInWithGoogle } from "@/lib/firebase";
 import { useLang } from "@/lib/lang";
 import { LangToggle } from "@/components/ui/LangToggle";
 
@@ -19,25 +19,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-  // Complete Google sign-in when user returns from redirect
-  useEffect(() => {
-    const cleanup = waitForGoogleRedirect(
-      ({ idToken, displayName }) => {
-        setIsGoogleLoading(true);
-        exchangeToken(idToken, displayName).catch(() => {
-          setError(tr("auth_google_error"));
-          setIsGoogleLoading(false);
-        });
-      },
-      () => {
-        setError(tr("auth_google_error"));
-        setIsGoogleLoading(false);
-      },
-    );
-    return () => { cleanup?.(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function exchangeToken(idToken: string, displayName?: string | null) {
     const response = await authApi.firebaseAuth(idToken, displayName);
@@ -71,9 +52,13 @@ export default function LoginPage() {
     setError(null);
     setIsGoogleLoading(true);
     try {
-      await signInWithGoogle(); // redirects away — page unloads
-    } catch {
-      setError(tr("auth_google_error"));
+      const { idToken, displayName } = await signInWithGoogle();
+      await exchangeToken(idToken, displayName);
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user" && err?.code !== "auth/cancelled-popup-request") {
+        setError(tr("auth_google_error"));
+      }
+    } finally {
       setIsGoogleLoading(false);
     }
   }

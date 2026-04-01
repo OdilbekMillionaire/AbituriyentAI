@@ -2,13 +2,12 @@ import { initializeApp, getApps } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
-  onAuthStateChanged,
+  signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
   signOut as firebaseSignOut,
-  type User,
+  type UserCredential,
 } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -22,11 +21,9 @@ const firebaseConfig = {
   measurementId:     process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Prevent duplicate initialization in Next.js hot-reload
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth = getAuth(app);
 
-// Initialize Analytics only in browser (not during SSR)
 if (typeof window !== "undefined") {
   isSupported().then(yes => { if (yes) getAnalytics(app); });
 }
@@ -34,61 +31,12 @@ if (typeof window !== "undefined") {
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
-// Key stored in sessionStorage to track a pending Google redirect sign-in.
-// sessionStorage survives the redirect but is cleared when the tab closes.
-const GOOGLE_PENDING_KEY = "g_auth_redirect_pending";
+// ── Google Sign-In (popup) ─────────────────────────────────────────────────────
 
-// ── Google Sign-In ─────────────────────────────────────────────────────────────
-
-/**
- * Start Google sign-in via full-page redirect.
- * Sets a sessionStorage flag so the auth page knows to wait for the result.
- */
-export async function signInWithGoogle(): Promise<void> {
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem(GOOGLE_PENDING_KEY, "1");
-  }
-  await signInWithRedirect(auth, googleProvider);
-}
-
-/**
- * Called on mount in auth pages.
- * If a Google redirect is pending, waits for Firebase to sign the user in
- * via onAuthStateChanged and returns their ID token.
- * Returns null immediately if no redirect was pending.
- */
-export function waitForGoogleRedirect(
-  callback: (result: { idToken: string; displayName: string | null }) => void,
-  onError: () => void,
-): (() => void) | null {
-  if (typeof window === "undefined") return null;
-  if (!sessionStorage.getItem(GOOGLE_PENDING_KEY)) return null;
-
-  // Flag is present — user is returning from Google redirect.
-  // Firebase will automatically sign them in and fire onAuthStateChanged.
-  const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
-    if (!user) return; // Firebase fires null first, then the signed-in user
-    sessionStorage.removeItem(GOOGLE_PENDING_KEY);
-    unsubscribe();
-    try {
-      const idToken = await user.getIdToken();
-      callback({ idToken, displayName: user.displayName });
-    } catch {
-      onError();
-    }
-  });
-
-  // Safety timeout: if Firebase never resolves in 15s, clean up
-  const timer = setTimeout(() => {
-    unsubscribe();
-    sessionStorage.removeItem(GOOGLE_PENDING_KEY);
-    onError();
-  }, 15000);
-
-  return () => {
-    unsubscribe();
-    clearTimeout(timer);
-  };
+export async function signInWithGoogle(): Promise<{ idToken: string; displayName: string | null }> {
+  const result: UserCredential = await signInWithPopup(auth, googleProvider);
+  const idToken = await result.user.getIdToken();
+  return { idToken, displayName: result.user.displayName };
 }
 
 // ── Email auth ─────────────────────────────────────────────────────────────────

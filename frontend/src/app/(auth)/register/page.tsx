@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { authApi, setToken } from "@/lib/api";
-import { registerWithEmail, signInWithGoogle, waitForGoogleRedirect } from "@/lib/firebase";
+import { registerWithEmail, signInWithGoogle } from "@/lib/firebase";
 import { useLang } from "@/lib/lang";
 import { LangToggle } from "@/components/ui/LangToggle";
 
@@ -21,25 +21,6 @@ export default function RegisterPage() {
 
   const passwordStrength =
     form.password.length >= 8 ? "strong" : form.password.length >= 4 ? "medium" : "weak";
-
-  // Complete Google sign-in when user returns from redirect
-  useEffect(() => {
-    const cleanup = waitForGoogleRedirect(
-      ({ idToken, displayName }) => {
-        setIsGoogleLoading(true);
-        exchangeToken(idToken, displayName).catch(() => {
-          setError(tr("auth_google_error"));
-          setIsGoogleLoading(false);
-        });
-      },
-      () => {
-        setError(tr("auth_google_error"));
-        setIsGoogleLoading(false);
-      },
-    );
-    return () => { cleanup?.(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function exchangeToken(idToken: string, displayName?: string | null) {
     const response = await authApi.firebaseAuth(idToken, displayName);
@@ -89,9 +70,13 @@ export default function RegisterPage() {
     setError(null);
     setIsGoogleLoading(true);
     try {
-      await signInWithGoogle(); // redirects away — page unloads
-    } catch {
-      setError(tr("auth_google_error"));
+      const { idToken, displayName } = await signInWithGoogle();
+      await exchangeToken(idToken, displayName);
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user" && err?.code !== "auth/cancelled-popup-request") {
+        setError(tr("auth_google_error"));
+      }
+    } finally {
       setIsGoogleLoading(false);
     }
   }
