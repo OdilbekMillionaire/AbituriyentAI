@@ -139,6 +139,18 @@ async def submit_exam(
     if not session:
         raise HTTPException(status_code=404, detail="Sessiya topilmadi.")
 
+    if session.status == SessionStatus.SUBMITTED:
+        # Idempotent: already submitted — reload answers and return existing result
+        answers_result = await db.execute(
+            select(ExamAnswer).where(ExamAnswer.session_id == session.id)
+        )
+        existing_answers = answers_result.scalars().all()
+        existing_q_ids = [a.question_id for a in existing_answers]
+        eq_result = await db.execute(select(Question).where(Question.id.in_(existing_q_ids)))
+        existing_qs_by_id: dict[int, Question] = {q.id: q for q in eq_result.scalars().all()}
+        score_result = compute_exam_score(existing_answers, existing_qs_by_id)
+        return _build_result_response(session, score_result, xp_earned=0, coins_earned=0)
+
     if session.status != SessionStatus.IN_PROGRESS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

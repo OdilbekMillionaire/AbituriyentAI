@@ -31,6 +31,7 @@ export function ExamSimulator({ session, onComplete }: ExamSimulatorProps) {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSubmittingRef = useRef(false); // sync guard — state updates are async
 
   const submitExam = useSubmitExam();
 
@@ -56,7 +57,8 @@ export function ExamSimulator({ session, onComplete }: ExamSimulatorProps) {
   }, [answers]);
 
   async function doSubmit() {
-    if (isSubmitting) return;
+    if (isSubmittingRef.current) return; // sync guard prevents race condition
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     clearInterval(timerRef.current!);
 
@@ -72,6 +74,7 @@ export function ExamSimulator({ session, onComplete }: ExamSimulatorProps) {
       onComplete(result.session_id);
     } catch (err) {
       console.error("Topshirishda xatolik:", err);
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
       setShowSubmitModal(false);
     }
