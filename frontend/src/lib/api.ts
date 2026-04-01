@@ -89,8 +89,8 @@ export const authApi = {
 
 // Exams
 export const examsApi = {
-  start: (subject: "all" | "mother_tongue" | "mathematics" | "history" = "all", mode: "practice" | "simulyatsiya" = "practice") =>
-    api.get(`/exams/start?subject=${subject}&mode=${mode}`),
+  start: (subject: "all" | "mother_tongue" | "mathematics" | "history" = "all", mode: "practice" | "simulyatsiya" = "practice", timeLimitMinutes = 0) =>
+    api.get(`/exams/start?subject=${subject}&mode=${mode}&time_limit_minutes=${timeLimitMinutes}`),
   submit: (sessionId: number, answers: { question_id: number; selected_option: string | null }[]) =>
     api.post("/exams/submit", { session_id: sessionId, answers }),
   getResults: (sessionId: number) =>

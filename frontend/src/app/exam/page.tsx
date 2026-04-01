@@ -8,23 +8,26 @@ import Link from "next/link";
 import { ArrowLeft, Clock, BookOpen, ChevronRight, Brain } from "lucide-react";
 import { isAuthenticated } from "@/lib/api";
 import { useStartExam } from "@/lib/queries";
-import { SubjectBadge } from "@/components/ui/SubjectBadge";
 import { useLang } from "@/lib/lang";
 import type { Subject } from "@/types";
 
 type ExamMode = "all" | "mother_tongue" | "mathematics" | "history";
 
 const colorClasses = {
-  blue:   { border: "border-blue-200",   bg: "bg-blue-50",   hover: "hover:border-blue-400",   text: "text-blue-600",   btn: "bg-blue-600 hover:bg-blue-700"   },
-  green:  { border: "border-green-200",  bg: "bg-green-50",  hover: "hover:border-green-400",  text: "text-green-600",  btn: "bg-green-600 hover:bg-green-700"  },
-  orange: { border: "border-orange-200", bg: "bg-orange-50", hover: "hover:border-orange-400", text: "text-orange-600", btn: "bg-orange-600 hover:bg-orange-700" },
+  blue:   { border: "border-blue-200",   bg: "bg-blue-50",   hover: "hover:border-blue-400",   text: "text-blue-600",   btn: "bg-blue-600 hover:bg-blue-700",   slider: "accent-blue-600"   },
+  green:  { border: "border-green-200",  bg: "bg-green-50",  hover: "hover:border-green-400",  text: "text-green-600",  btn: "bg-green-600 hover:bg-green-700",  slider: "accent-green-600"  },
+  orange: { border: "border-orange-200", bg: "bg-orange-50", hover: "hover:border-orange-400", text: "text-orange-600", btn: "bg-orange-600 hover:bg-orange-700", slider: "accent-orange-600" },
 };
+
+// Quick-pick time presets shown as chips
+const TIME_PRESETS = [10, 15, 20, 30, 45, 60];
 
 function ExamModeSelectorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { tr } = useLang();
   const [selectedMode, setSelectedMode] = useState<ExamMode>("all");
+  const [customTime, setCustomTime] = useState<number>(30); // minutes, 10–60
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,49 +39,13 @@ function ExamModeSelectorPage() {
     descKey: string;
     subject?: Subject;
     questionCount: number;
-    durationMin: number;
     color: string;
     icon: string;
   }[] = [
-    {
-      id: "all",
-      labelKey: "exam_full",
-      descKey: "exam_full_desc",
-      questionCount: 30,
-      durationMin: 60,
-      color: "blue",
-      icon: "🎯",
-    },
-    {
-      id: "mother_tongue",
-      labelKey: "subject_mother_tongue",
-      descKey: "subject_desc_mt",
-      subject: "MOTHER_TONGUE",
-      questionCount: 10,
-      durationMin: 20,
-      color: "blue",
-      icon: "📝",
-    },
-    {
-      id: "mathematics",
-      labelKey: "subject_mathematics",
-      descKey: "subject_desc_math",
-      subject: "MATHEMATICS",
-      questionCount: 10,
-      durationMin: 20,
-      color: "green",
-      icon: "📐",
-    },
-    {
-      id: "history",
-      labelKey: "subject_history",
-      descKey: "subject_desc_hist",
-      subject: "HISTORY",
-      questionCount: 10,
-      durationMin: 20,
-      color: "orange",
-      icon: "🏛️",
-    },
+    { id: "all",          labelKey: "exam_full",           descKey: "exam_full_desc",    questionCount: 30, color: "blue",   icon: "🎯" },
+    { id: "mother_tongue",labelKey: "subject_mother_tongue",descKey: "subject_desc_mt",  questionCount: 10, color: "blue",   icon: "📝", subject: "MOTHER_TONGUE" },
+    { id: "mathematics",  labelKey: "subject_mathematics",  descKey: "subject_desc_math", questionCount: 10, color: "green",  icon: "📐", subject: "MATHEMATICS" },
+    { id: "history",      labelKey: "subject_history",      descKey: "subject_desc_hist", questionCount: 10, color: "orange", icon: "🏛️", subject: "HISTORY" },
   ];
 
   useEffect(() => {
@@ -89,25 +56,32 @@ function ExamModeSelectorPage() {
     }
   }, [router, searchParams]);
 
+  // Reset custom time to a sensible default when mode changes
+  useEffect(() => {
+    setCustomTime(selectedMode === "all" ? 30 : 20);
+  }, [selectedMode]);
+
   async function handleStart() {
     setIsStarting(true);
     setError(null);
     try {
-      const session = await startExam.mutateAsync(selectedMode);
+      const session = await startExam.mutateAsync({ subject: selectedMode, timeLimitMinutes: customTime });
       sessionStorage.setItem("exam_session", JSON.stringify(session));
       router.push("/exam/session");
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(
-        axiosErr.response?.data?.detail ||
-          tr("try_again")
-      );
+      setError(axiosErr.response?.data?.detail || tr("try_again"));
       setIsStarting(false);
     }
   }
 
   const selected = EXAM_MODES.find((m) => m.id === selectedMode)!;
   const colors = colorClasses[selected.color as keyof typeof colorClasses];
+
+  function formatTime(min: number) {
+    if (min < 60) return `${min} ${tr("minutes")}`;
+    return `1 ${tr("hour") ?? "soat"}`;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -130,7 +104,7 @@ function ExamModeSelectorPage() {
         </div>
 
         {/* Mode cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {EXAM_MODES.map((mode) => {
             const mc = colorClasses[mode.color as keyof typeof colorClasses];
             const isSelected = selectedMode === mode.id;
@@ -163,14 +137,47 @@ function ExamModeSelectorPage() {
                     <BookOpen className="w-3.5 h-3.5" />
                     {mode.questionCount} {tr("exam_questions")}
                   </span>
-                  <span className="flex items-center gap-1 text-slate-400">
-                    <Clock className="w-3.5 h-3.5" />
-                    {mode.durationMin} {tr("minutes")}
-                  </span>
                 </div>
               </button>
             );
           })}
+        </div>
+
+        {/* ── Time picker ── */}
+        <div className={`rounded-xl border-2 ${colors.border} bg-white p-5 mb-5`}>
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className={`w-4 h-4 ${colors.text}`} />
+            <span className="font-semibold text-slate-800 text-sm">Vaqt limiti</span>
+            <span className={`ml-auto text-xl font-bold ${colors.text}`}>{formatTime(customTime)}</span>
+          </div>
+
+          {/* Slider */}
+          <input
+            type="range"
+            min={10}
+            max={60}
+            step={5}
+            value={customTime}
+            onChange={(e) => setCustomTime(Number(e.target.value))}
+            className={`w-full h-2 rounded-full cursor-pointer mb-4 ${colors.slider}`}
+          />
+
+          {/* Quick preset chips */}
+          <div className="flex flex-wrap gap-2">
+            {TIME_PRESETS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setCustomTime(t)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  customTime === t
+                    ? `${colors.btn} text-white border-transparent`
+                    : "border-slate-200 text-slate-600 hover:border-slate-300 bg-slate-50"
+                }`}
+              >
+                {t === 60 ? "1 soat" : `${t} min`}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Selected summary + Start */}
@@ -195,7 +202,7 @@ function ExamModeSelectorPage() {
           <div className="flex items-center gap-3 text-sm text-slate-500 mb-6">
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              {selected.durationMin} {tr("minutes")}
+              {formatTime(customTime)}
             </span>
             <span>•</span>
             <span>{tr("exam_max")} {(selected.questionCount * 1.1).toFixed(1)}</span>

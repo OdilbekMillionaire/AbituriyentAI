@@ -50,6 +50,11 @@ async def start_exam(
         default="practice",
         description="practice | simulyatsiya — simulyatsiya forces all subjects, 45 min",
     ),
+    time_limit_minutes: int = Query(
+        default=0,
+        ge=0,
+        description="Custom time limit in minutes (10–60). 0 = use default. Ignored in simulyatsiya mode.",
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> ExamStartResponse:
@@ -93,7 +98,12 @@ async def start_exam(
             )
         all_questions.extend(questions)
 
-    time_limit = DTM_SIMULYATSIYA_MINUTES if is_simulyatsiya else settings.exam_time_limit_minutes
+    if is_simulyatsiya:
+        time_limit = DTM_SIMULYATSIYA_MINUTES
+    elif time_limit_minutes > 0:
+        time_limit = max(10, min(60, time_limit_minutes))
+    else:
+        time_limit = settings.exam_time_limit_minutes
 
     # Create session
     session = ExamSession(

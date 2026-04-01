@@ -87,12 +87,10 @@ export function useDailyCheckin(): UseMutationResult<unknown, Error, void> {
 
 // ── Exam ──────────────────────────────────────────────────────────────────────
 
-export function useStartExam(
-  subject: "all" | "mother_tongue" | "mathematics" | "history" = "all"
-): UseMutationResult<ExamSession, Error, typeof subject> {
+export function useStartExam(): UseMutationResult<ExamSession, Error, { subject: "all" | "mother_tongue" | "mathematics" | "history"; timeLimitMinutes?: number }> {
   return useMutation({
-    mutationFn: async (subjectParam) => {
-      const res = await examsApi.start(subjectParam);
+    mutationFn: async ({ subject, timeLimitMinutes = 0 }) => {
+      const res = await examsApi.start(subject, "practice", timeLimitMinutes);
       return res.data as ExamSession;
     },
   });
