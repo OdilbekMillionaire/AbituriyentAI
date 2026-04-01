@@ -10,7 +10,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 30000,
+  timeout: 65000, // 65s — covers Render free-tier cold start (~50s)
 });
 
 // ── Request interceptor: attach JWT ──────────────────────────────────────────

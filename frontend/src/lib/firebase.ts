@@ -2,14 +2,12 @@ import { initializeApp, getApps } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
   signOut as firebaseSignOut,
-  type UserCredential,
 } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -36,22 +34,13 @@ googleProvider.setCustomParameters({ prompt: "select_account" });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Sign in with Google — popup first, redirect fallback if popup is blocked. */
-export async function signInWithGoogle(): Promise<{ idToken: string; displayName: string | null }> {
-  try {
-    const result: UserCredential = await signInWithPopup(auth, googleProvider);
-    const idToken = await result.user.getIdToken();
-    return { idToken, displayName: result.user.displayName };
-  } catch (err: unknown) {
-    const code = (err as { code?: string })?.code ?? "";
-    // Popup blocked by browser → fall back to full-page redirect
-    if (code === "auth/popup-blocked" || code === "auth/popup-failed-silently") {
-      await signInWithRedirect(auth, googleProvider);
-      // Page will redirect — this promise never resolves
-      return new Promise(() => {});
-    }
-    throw err;
-  }
+/**
+ * Sign in with Google via full-page redirect (no popup).
+ * Eliminates COOP/popup-blocker issues entirely.
+ * Call getGoogleRedirectResult() on mount to complete the sign-in.
+ */
+export async function signInWithGoogle(): Promise<void> {
+  await signInWithRedirect(auth, googleProvider);
 }
 
 /**

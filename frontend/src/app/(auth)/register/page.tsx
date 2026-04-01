@@ -80,13 +80,9 @@ export default function RegisterPage() {
     setError(null);
     setIsGoogleLoading(true);
     try {
-      const { idToken, displayName } = await signInWithGoogle();
-      await exchangeToken(idToken, displayName);
-    } catch (err: any) {
-      if (err?.code !== "auth/popup-closed-by-user") {
-        setError(tr("auth_google_error"));
-      }
-    } finally {
+      await signInWithGoogle(); // redirects away — page unloads
+    } catch {
+      setError(tr("auth_google_error"));
       setIsGoogleLoading(false);
     }
   }
