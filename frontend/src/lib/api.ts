@@ -118,6 +118,7 @@ export const lessonsApi = {
 // Gamification / User
 export const userApi = {
   getProfile: () => api.get("/user/profile"),
+  updateProfile: (username: string) => api.patch("/user/profile", { username }),
   getLeaderboard: (limit = 20) => api.get(`/user/leaderboard?limit=${limit}`),
   dailyCheckin: () => api.post("/user/daily-checkin"),
   getStats: () => api.get("/user/stats"),

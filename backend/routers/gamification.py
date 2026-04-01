@@ -374,6 +374,56 @@ async def weak_areas(
     )
 
 
+# ── Update profile ────────────────────────────────────────────────────────────
+
+class UpdateProfileRequest(BaseModel):
+    username: str
+
+
+@router.patch(
+    "/profile",
+    response_model=UserProfile,
+    summary="Foydalanuvchi profilini yangilash",
+)
+async def update_profile(
+    body: UpdateProfileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserProfile:
+    username = body.username.strip()
+    if len(username) < 2:
+        raise HTTPException(status_code=422, detail="Username kamida 2 ta belgi bo'lishi kerak")
+    if len(username) > 50:
+        raise HTTPException(status_code=422, detail="Username juda uzun")
+
+    existing = await db.execute(
+        select(User).where(User.username == username, User.id != current_user.id)
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Bu username band")
+
+    current_user.username = username
+    await db.commit()
+    await db.refresh(current_user)
+
+    xp_in_level = current_user.xp % settings.xp_per_level
+    xp_to_next = settings.xp_per_level - xp_in_level
+    return UserProfile(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        xp=current_user.xp,
+        level=current_user.level,
+        streak_days=current_user.streak_days,
+        coins=current_user.coins,
+        oxforder_tanga=current_user.oxforder_tanga,
+        last_active_date=current_user.last_active_date,
+        created_at=current_user.created_at,
+        xp_to_next_level=xp_to_next,
+        xp_in_current_level=xp_in_level,
+    )
+
+
 # ── Chaqa → Tanga exchange ─────────────────────────────────────────────────────
 
 CHAQA_PER_TANGA = 1000
